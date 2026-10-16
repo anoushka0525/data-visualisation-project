@@ -1,0 +1,676 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Behind the Plug | Home Appliances</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Vega Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vega@6/build/vega.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6/build/vega-lite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@7/build/vega-embed.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ========================================
+         NAVIGATION
+    ======================================== -->
+
+    <nav class="nav">
+        <a class="brand" href="#top">
+            <span class="bolt">↯</span>
+            BEHIND THE PLUG
+        </a>
+
+        <div class="links">
+            <a href="#ownership">Ownership</a>
+            <a href="#comparison">Countries</a>
+            <a href="#products">Product choices</a>
+            <a href="#sources">Sources</a>
+        </div>
+    </nav>
+
+
+    <!-- ========================================
+         HERO SECTION
+    ======================================== -->
+
+    <header class="hero" id="top">
+        <div class="container">
+
+            <p class="eyebrow">
+                DATA VISUALISATION 2 · HOME APPLIANCES
+            </p>
+
+            <h1>
+                Our homes.<br>
+                <em>Our appliances.</em><br>
+                Our changing world.
+            </h1>
+
+            <p class="dek">
+                From refrigerators to dishwashers, the appliances
+                inside our homes tell a story about convenience,
+                access, and consumption. Explore how ownership
+                patterns evolve—and what data can (and cannot)
+                tell us about consumer choice.
+            </p>
+
+            <div class="hero-pills">
+                <span>120 countries / economies</span>
+                <span>2000–2024 coverage</span>
+                <span>International Energy Agency</span>
+            </div>
+
+            <a href="#ownership" class="scroll-link">
+                Explore the story
+                <span>↓</span>
+            </a>
+
+        </div>
+
+        <div class="hero-number">01—04</div>
+    </header>
+
+
+    <main>
+
+        <!-- ========================================
+             INTRODUCTION
+        ======================================== -->
+
+        <section class="intro container">
+
+            <div class="kicker">THE BIG PICTURE</div>
+
+            <h2>
+                More than gadgets.
+                <span>Everyday infrastructure.</span>
+            </h2>
+
+            <p>
+                Household appliances affect how we store food,
+                clean clothes and organise daily life. Adoption
+                is not uniform: appliance type, country, and
+                year all matter.
+
+                This visual story first explores ownership
+                with IEA data, before turning to product
+                listings and consumer ratings when a separate
+                product dataset is added.
+            </p>
+
+            <div class="stat-row">
+
+                <div>
+                    <b>120</b>
+                    <small>countries / economies in source data</small>
+                </div>
+
+                <div>
+                    <b>9</b>
+                    <small>appliance categories</small>
+                </div>
+
+                <div>
+                    <b>3</b>
+                    <small>different measures</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================
+             CHAPTER 1: APPLIANCE ADOPTION
+        ======================================== -->
+
+        <section id="ownership" class="chapter">
+            <div class="container">
+
+                <div class="section-head">
+
+                    <div class="count">
+                        01 <span>APPLIANCE ADOPTION</span>
+                    </div>
+
+                    <h2>
+                        How appliances become<br>
+                        part of everyday life
+                    </h2>
+
+                    <p>
+                        Diffusion measures average appliances
+                        per dwelling. A value of 1.0 means one
+                        appliance per dwelling on average—not
+                        necessarily that every household owns one.
+                    </p>
+
+                </div>
+
+
+                <!-- Chart 1: Ownership Over Time -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                TIME SERIES · MULTI-LINE
+                            </span>
+
+                            <h3>
+                                How has ownership changed over time?
+                            </h3>
+
+                            <p>
+                                Choose a country, then hover over
+                                a line to inspect the year and average
+                                appliances per dwelling.
+                            </p>
+                        </div>
+
+                        <label>
+                            COUNTRY
+                            <select id="countrySelect"></select>
+                        </label>
+
+                    </div>
+
+                    <div id="chart1" class="viz"></div>
+
+                    <div class="note">
+                        Reading the chart: compare trajectories
+                        rather than assuming all countries were
+                        measured in the same years.
+                    </div>
+
+                </div>
+
+
+                <!-- Chart 2: Appliance Stocks -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                COMPOSITION · STACKED AREA
+                            </span>
+
+                            <h3>
+                                How has the installed appliance
+                                stock changed?
+                            </h3>
+
+                            <p>
+                                Total stocks across selected categories,
+                                measured in millions of units; categories
+                                are stacked by year.
+                            </p>
+                        </div>
+
+                        <label>
+                            COUNTRY
+                            <select id="stocksCountrySelect"></select>
+                        </label>
+
+                    </div>
+
+                    <div id="chart2" class="viz"></div>
+
+                    <div class="note">
+                        Only appliance categories reported in the
+                        chosen country are shown. Missing data
+                        is not estimated as zero.
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================
+             CHAPTER 2: COUNTRIES COMPARED
+        ======================================== -->
+
+        <section id="comparison" class="chapter alt">
+            <div class="container">
+
+                <div class="section-head">
+
+                    <div class="count">
+                        02 <span>COUNTRIES COMPARED</span>
+                    </div>
+
+                    <h2>
+                        The same appliance.<br>
+                        Different places.
+                    </h2>
+
+                    <p>
+                        Comparing country results can reveal
+                        differences in appliance uptake, but
+                        not necessarily why they exist.
+                    </p>
+
+                </div>
+
+
+                <!-- Chart 3: Country Heatmap -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                COMPARISON · HEATMAP
+                            </span>
+
+                            <h3>
+                                Which appliances are most common
+                                across selected economies?
+                            </h3>
+
+                            <p>
+                                Each square shows the
+                                <strong>latest available</strong>
+                                reported diffusion value for that
+                                country and appliance.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div id="chart3" class="viz"></div>
+
+                    <div class="note">
+                        Country-appliance observations may refer
+                        to different years; hover for the exact
+                        reporting year.
+                    </div>
+
+                </div>
+
+
+                <!-- Chart 4: Country Ranking -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                RANKING · DOT PLOT
+                            </span>
+
+                            <h3>
+                                How do countries compare on one appliance?
+                            </h3>
+
+                            <p>
+                                Select an appliance to see the most
+                                recent recorded diffusion
+                                (with reporting years in tooltips).
+                            </p>
+                        </div>
+
+                        <label>
+                            APPLIANCE
+                            <select id="applianceSelect"></select>
+                        </label>
+
+                    </div>
+
+                    <div id="chart4" class="viz"></div>
+
+                    <div class="note">
+                        This is a descriptive comparison, not an
+                        annual ranking: the latest year varies
+                        by country.
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================
+             CHAPTER 3: OWNERSHIP PENETRATION
+        ======================================== -->
+
+        <section class="chapter">
+            <div class="container">
+
+                <div class="section-head">
+
+                    <div class="count">
+                        03 <span>ANOTHER LENS</span>
+                    </div>
+
+                    <h2>
+                        Ownership is more than<br>
+                        a single statistic.
+                    </h2>
+
+                    <p>
+                        Penetration reports the share of households
+                        owning an appliance. It is conceptually
+                        different from diffusion and cannot be
+                        directly combined on one numeric scale.
+                    </p>
+
+                </div>
+
+
+                <!-- Chart 5: Penetration Heatmap -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                PERCENTAGE · HEATMAP
+                            </span>
+
+                            <h3>
+                                Where are appliances widely owned?
+                            </h3>
+
+                            <p>
+                                For economies with penetration records,
+                                colour represents the latest reported
+                                household ownership percentage.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div id="chart5" class="viz"></div>
+
+                    <div class="note">
+                        Countries and years are restricted by
+                        data availability. White / blank cells
+                        indicate missing observations, not zero ownership.
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================
+             CHAPTER 4: PRODUCT CHOICES
+        ======================================== -->
+
+        <section id="products" class="chapter alt">
+            <div class="container">
+
+                <div class="section-head">
+
+                    <div class="count">
+                        04 <span>FROM OWNERSHIP TO CHOICE</span>
+                    </div>
+
+                    <h2>
+                        What makes a product<br>
+                        worth choosing?
+                    </h2>
+
+                    <p>
+                        This section is reserved for our second source:
+                        product-level appliance listings and reviews.
+                        It will compare brands, prices and customer
+                        ratings rather than national ownership.
+                    </p>
+
+                </div>
+
+
+                <!-- Chart 6: Price vs Rating -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                PRODUCT COMPARISON · PRICE VS RATING
+                            </span>
+
+                            <h3>
+                                Do higher-priced appliances
+                                receive better ratings?
+                            </h3>
+
+                            <p>
+                                Once <code>data/products.csv</code>
+                                is added, each point represents an
+                                appliance listing. Use the category
+                                dropdown to compare products.
+                            </p>
+                        </div>
+
+                        <label>
+                            CATEGORY
+
+                            <select id="productCategorySelect">
+                                <option>All categories</option>
+                            </select>
+                        </label>
+
+                    </div>
+
+                    <div id="chart6" class="viz"></div>
+
+                    <div id="productNotice" class="note">
+                        Awaiting the second dataset. No illustrative
+                        or invented customer ratings are displayed.
+                    </div>
+
+                </div>
+
+
+                <!-- Chart 7: Brand Comparison -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+                            <span class="tag">
+                                BRAND COMPARISON · BAR CHART
+                            </span>
+
+                            <h3>
+                                Which brands have higher average
+                                reviewed scores?
+                            </h3>
+
+                            <p>
+                                Brand comparisons appear after
+                                product data is loaded. Only brands
+                                with sufficient review coverage
+                                should be interpreted.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div id="chart7" class="viz"></div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================
+             CONCLUSION
+        ======================================== -->
+
+        <section class="conclusion container">
+
+            <span class="kicker">THE TAKEAWAY</span>
+
+            <h2>
+                Appliance adoption is global.<br>
+                <em>Consumer choice is personal.</em>
+            </h2>
+
+            <p>
+                The IEA data lets us compare long-run household
+                appliance uptake, but ownership metrics cannot
+                establish purchasing motivations, product quality
+                or brand preference.
+
+                Combining adoption data with properly sourced
+                product listings lets us explore both perspectives
+                without confusing them.
+            </p>
+
+        </section>
+
+
+        <!-- ========================================
+             SOURCES AND LIMITATIONS
+        ======================================== -->
+
+        <section id="sources" class="sources container">
+
+            <h2>Sources and limitations</h2>
+
+            <div class="source-grid">
+
+                <!-- Source 1: IEA -->
+
+                <div>
+                    <h3>01 · Household ownership</h3>
+
+                    <p>
+                        International Energy Agency,
+                        <i>Household Appliances Database</i>,
+                        June 2026 pilot edition.
+
+                        Observations span 2000–2024,
+                        unevenly across countries and measures.
+                    </p>
+
+                    <a href="https://www.iea.org/data-and-statistics/data-product/household-appliances-database"
+                       target="_blank"
+                       rel="noopener">
+                        IEA dataset ↗
+                    </a>
+                </div>
+
+
+                <!-- Source 2: Amazon Reviews -->
+
+                <div>
+                    <h3>02 · Product data (to add)</h3>
+
+                    <p>
+                        UC San Diego McAuley Lab,
+                        <i>Amazon Reviews 2023</i>,
+                        Appliances product metadata and reviews.
+
+                        The product section remains empty until
+                        a cleaned, source-attributed CSV is supplied.
+                    </p>
+
+                    <a href="https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023"
+                       target="_blank"
+                       rel="noopener">
+                        Amazon Reviews 2023 ↗
+                    </a>
+                </div>
+
+
+                <!-- Methodology -->
+
+                <div>
+                    <h3>Methodology</h3>
+
+                    <p>
+                        Stocks are expressed in millions of units;
+                        diffusion is average units per dwelling;
+                        penetration is a proportion.
+
+                        Values are not interpolated, and
+                        cross-country latest-year comparisons
+                        may mix years.
+
+                        Retail product rating data does not
+                        measure sales volume.
+                    </p>
+                </div>
+
+
+                <!-- Attribution -->
+
+                <div>
+                    <h3>Attribution</h3>
+
+                    <p>
+                        Student: [add your name / ID].
+
+                        Course: FIT3179 Data Visualisation 2.
+
+                        Website created with Vega-Lite
+                        and Vega-Embed.
+
+                        Review your course policy before
+                        finalising the AI acknowledgement.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ========================================
+         FOOTER
+    ======================================== -->
+
+    <footer>
+        <span>BEHIND THE PLUG</span>
+
+        <span>
+            FIT3179 · DATA VISUALISATION 2 · 2026
+        </span>
+
+        <a href="#top">
+            Back to top ↑
+        </a>
+    </footer>
+
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+
+</body>
+</html>
