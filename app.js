@@ -1335,6 +1335,422 @@ async function startWebsite() {
 
         applianceSelect.onchange = drawChart4;
 
+       
+/* ==========================================================
+   CHART 6 — APPLIANCE DIFFUSION CHANGE
+   Type: Dumbbell Chart
+   Earliest vs Latest Observations
+========================================================== */
+
+function drawChart6() {
+
+    const country = "Australia";
+
+    const data = rows.filter(row =>
+        row.country === country &&
+        row.metric === "Diffusion"
+    );
+
+    const groups = {};
+
+    data.forEach(row => {
+        if (!groups[row.appliance]) {
+            groups[row.appliance] = [];
+        }
+        groups[row.appliance].push(row);
+    });
+
+    const chartData = [];
+
+    Object.entries(groups).forEach(([appliance, records]) => {
+
+        records.sort((a, b) => a.year - b.year);
+
+        const first = records[0];
+        const last = records[records.length - 1];
+
+        if (first.year === last.year) return;
+
+        chartData.push({
+            appliance: appliance,
+            firstValue: first.value,
+            lastValue: last.value,
+            firstYear: first.year,
+            lastYear: last.year,
+            change: last.value - first.value
+        });
+    });
+
+    if (!chartData.length) {
+        showPlaceholder(
+            "chart6",
+            "Insufficient observations for change comparison."
+        );
+        return;
+    }
+
+    const spec = {
+
+        height: 340,
+
+        data: {
+            values: chartData
+        },
+
+        layer: [
+
+            // Connecting line
+            {
+                mark: {
+                    type: "rule",
+                    strokeWidth: 3,
+                    color: "#b8c8cb"
+                },
+
+                encoding: {
+                    y: {
+                        field: "appliance",
+                        type: "nominal",
+                        sort: {
+                            field: "change",
+                            order: "descending"
+                        },
+                        title: null
+                    },
+
+                    x: {
+                        field: "firstValue",
+                        type: "quantitative",
+                        title: "Average Appliances per Dwelling"
+                    },
+
+                    x2: {
+                        field: "lastValue"
+                    }
+                }
+            },
+
+            // Earliest observation
+            {
+                mark: {
+                    type: "point",
+                    filled: true,
+                    color: "#e9a255",
+                    size: 110
+                },
+
+                encoding: {
+                    y: {
+                        field: "appliance",
+                        type: "nominal",
+                        sort: {
+                            field: "change",
+                            order: "descending"
+                        },
+                        title: null
+                    },
+
+                    x: {
+                        field: "firstValue",
+                        type: "quantitative"
+                    },
+
+                    tooltip: [
+                        {
+                            field: "appliance",
+                            title: "Appliance"
+                        },
+                        {
+                            field: "firstYear",
+                            title: "First Year",
+                            format: "d"
+                        },
+                        {
+                            field: "firstValue",
+                            title: "Initial Diffusion",
+                            format: ".3f"
+                        }
+                    ]
+                }
+            },
+
+            // Latest observation
+            {
+                mark: {
+                    type: "point",
+                    filled: true,
+                    color: "#00897f",
+                    size: 110
+                },
+
+                encoding: {
+                    y: {
+                        field: "appliance",
+                        type: "nominal",
+                        sort: {
+                            field: "change",
+                            order: "descending"
+                        },
+                        title: null
+                    },
+
+                    x: {
+                        field: "lastValue",
+                        type: "quantitative"
+                    },
+
+                    tooltip: [
+                        {
+                            field: "appliance",
+                            title: "Appliance"
+                        },
+                        {
+                            field: "lastYear",
+                            title: "Latest Year",
+                            format: "d"
+                        },
+                        {
+                            field: "lastValue",
+                            title: "Latest Diffusion",
+                            format: ".3f"
+                        },
+                        {
+                            field: "change",
+                            title: "Change",
+                            format: "+.3f"
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+
+    renderChart("chart6", spec);
+}
+
+
+/* ==========================================================
+   CHART 7 — INTERNATIONAL DISTRIBUTION
+   Type: Box Plot
+   Latest Appliance Diffusion by Country
+========================================================== */
+
+function drawChart7() {
+
+    const data = latest.filter(row =>
+        row.metric === "Diffusion" &&
+        row.year >= 2015
+    );
+
+    if (!data.length) {
+        showPlaceholder(
+            "chart7",
+            "No recent diffusion observations available."
+        );
+        return;
+    }
+
+    const spec = {
+
+        height: 390,
+
+        data: {
+            values: data
+        },
+
+        mark: {
+            type: "boxplot",
+            extent: 1.5,
+            size: 28
+        },
+
+        encoding: {
+
+            x: {
+                field: "appliance",
+                type: "nominal",
+                title: "Appliance Category",
+
+                axis: {
+                    labelAngle: -35,
+                    labelLimit: 160
+                }
+            },
+
+            y: {
+                field: "value",
+                type: "quantitative",
+                title: "Appliances per Dwelling",
+
+                scale: {
+                    zero: true
+                }
+            },
+
+            color: {
+                value: "#16877d"
+            }
+        }
+    };
+
+    renderChart("chart7", spec);
+}
+
+
+/* ==========================================================
+   CHART 8 — STOCK VS DIFFUSION
+   Type: Bubble Scatterplot
+
+   Compares matching country, appliance and year records.
+   Each country-appliance pair contributes its latest
+   matching observation.
+========================================================== */
+
+function drawChart8() {
+
+    const diffusion = rows.filter(row =>
+        row.metric === "Diffusion"
+    );
+
+    const stocks = rows.filter(row =>
+        row.metric === "Stocks"
+    );
+
+    // Index stock records for matching observations
+    const stockMap = new Map();
+
+    stocks.forEach(row => {
+
+        const key = [
+            row.country,
+            row.appliance,
+            row.year
+        ].join("|");
+
+        stockMap.set(key, row.value);
+    });
+
+    const matches = [];
+
+    diffusion.forEach(row => {
+
+        const key = [
+            row.country,
+            row.appliance,
+            row.year
+        ].join("|");
+
+        const stock = stockMap.get(key);
+
+        if (
+            stock !== undefined &&
+            stock > 0 &&
+            row.value > 0 &&
+            row.year >= 2015
+        ) {
+            matches.push({
+                country: row.country,
+                appliance: row.appliance,
+                year: row.year,
+                diffusion: row.value,
+                stock: stock
+            });
+        }
+    });
+
+    // Keep the latest matched observation per
+    // country and appliance.
+    const chartData = latestPer(
+        matches,
+        ["country", "appliance"]
+    );
+
+    if (!chartData.length) {
+        showPlaceholder(
+            "chart8",
+            "No matching stock and diffusion observations."
+        );
+        return;
+    }
+
+    const spec = {
+
+        height: 420,
+
+        data: {
+            values: chartData
+        },
+
+        mark: {
+            type: "circle",
+            opacity: 0.65,
+            stroke: "#ffffff",
+            strokeWidth: 0.5
+        },
+
+        encoding: {
+
+            x: {
+                field: "diffusion",
+                type: "quantitative",
+                title: "Average Appliances per Dwelling"
+            },
+
+            y: {
+                field: "stock",
+                type: "quantitative",
+                title: "Appliance Stock (Millions)",
+                scale: {
+                    type: "log"
+                }
+            },
+
+            color: {
+                field: "appliance",
+                type: "nominal",
+                title: "Appliance"
+            },
+
+            size: {
+                field: "stock",
+                type: "quantitative",
+                title: "Stock (Millions)",
+                scale: {
+                    range: [35, 550]
+                }
+            },
+
+            tooltip: [
+                {
+                    field: "country",
+                    title: "Country"
+                },
+                {
+                    field: "appliance",
+                    title: "Appliance"
+                },
+                {
+                    field: "year",
+                    title: "Year",
+                    format: "d"
+                },
+                {
+                    field: "diffusion",
+                    title: "Units per Dwelling",
+                    format: ".3f"
+                },
+                {
+                    field: "stock",
+                    title: "Stock (Millions)",
+                    format: ",.2f"
+                }
+            ]
+        }
+    };
+
+    renderChart("chart8", spec);
+}
+
 
         /* ------------------------------------------
            RENDER ALL IEA CHARTS
@@ -1348,7 +1764,9 @@ async function startWebsite() {
 
         // Load product visualisations separately.
 
-        loadProducts();
+        drawChart6();
+        drawChart7();
+        drawChart8();
 
     } catch (error) {
 
