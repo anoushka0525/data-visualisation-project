@@ -29,6 +29,7 @@
     ======================================== -->
 
     <nav class="nav">
+
         <a class="brand" href="#top">
             <span class="bolt">↯</span>
             BEHIND THE PLUG
@@ -37,9 +38,10 @@
         <div class="links">
             <a href="#ownership">Ownership</a>
             <a href="#comparison">Countries</a>
-            <a href="#products">Product choices</a>
+            <a href="#differences">Differences</a>
             <a href="#sources">Sources</a>
         </div>
+
     </nav>
 
 
@@ -48,6 +50,7 @@
     ======================================== -->
 
     <header class="hero" id="top">
+
         <div class="container">
 
             <p class="eyebrow">
@@ -63,9 +66,12 @@
             <p class="dek">
                 From refrigerators to dishwashers, the appliances
                 inside our homes tell a story about convenience,
-                access, and consumption. Explore how ownership
-                patterns evolve—and what data can (and cannot)
-                tell us about consumer choice.
+                access, and consumption.
+
+                Explore how household appliance ownership has
+                evolved across countries, which appliances
+                have become more widespread, and how adoption
+                patterns differ around the world.
             </p>
 
             <div class="hero-pills">
@@ -82,6 +88,7 @@
         </div>
 
         <div class="hero-number">01—04</div>
+
     </header>
 
 
@@ -93,7 +100,9 @@
 
         <section class="intro container">
 
-            <div class="kicker">THE BIG PICTURE</div>
+            <div class="kicker">
+                THE BIG PICTURE
+            </div>
 
             <h2>
                 More than gadgets.
@@ -101,15 +110,18 @@
             </h2>
 
             <p>
-                Household appliances affect how we store food,
-                clean clothes and organise daily life. Adoption
-                is not uniform: appliance type, country, and
-                year all matter.
+                Household appliances have transformed the way
+                people store food, wash clothes and manage
+                everyday activities.
 
-                This visual story first explores ownership
-                with IEA data, before turning to product
-                listings and consumer ratings when a separate
-                product dataset is added.
+                However, appliance adoption differs significantly
+                across countries and appliance categories.
+
+                Using data from the International Energy Agency,
+                this visualisation explores how household appliance
+                ownership has developed over time, how adoption
+                varies across countries, and how appliance stocks
+                relate to household diffusion.
             </p>
 
             <div class="stat-row">
@@ -139,6 +151,7 @@
         ======================================== -->
 
         <section id="ownership" class="chapter">
+
             <div class="container">
 
                 <div class="section-head">
@@ -153,22 +166,27 @@
                     </h2>
 
                     <p>
-                        Diffusion measures average appliances
-                        per dwelling. A value of 1.0 means one
-                        appliance per dwelling on average—not
-                        necessarily that every household owns one.
+                        Diffusion measures the average number of
+                        appliances per dwelling.
+
+                        A diffusion value of 1.0 represents
+                        an average of one appliance per dwelling,
+                        not necessarily ownership by every household.
                     </p>
 
                 </div>
 
 
-                <!-- Chart 1: Ownership Over Time -->
+                <!-- ========================================
+                     CHART 1: MULTI-LINE CHART
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
                                 TIME SERIES · MULTI-LINE
                             </span>
@@ -178,10 +196,14 @@
                             </h3>
 
                             <p>
-                                Choose a country, then hover over
-                                a line to inspect the year and average
-                                appliances per dwelling.
+                                Explore how appliance diffusion
+                                has evolved over time.
+
+                                Select a country and hover over
+                                the lines to inspect individual
+                                appliance categories and values.
                             </p>
+
                         </div>
 
                         <label>
@@ -194,21 +216,24 @@
                     <div id="chart1" class="viz"></div>
 
                     <div class="note">
-                        Reading the chart: compare trajectories
-                        rather than assuming all countries were
-                        measured in the same years.
+                        Compare appliance diffusion trends over time.
+                        Reporting periods may vary across countries
+                        and appliance categories.
                     </div>
 
                 </div>
 
 
-                <!-- Chart 2: Appliance Stocks -->
+                <!-- ========================================
+                     CHART 2: STACKED AREA CHART
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
                                 COMPOSITION · STACKED AREA
                             </span>
@@ -219,10 +244,14 @@
                             </h3>
 
                             <p>
-                                Total stocks across selected categories,
-                                measured in millions of units; categories
-                                are stacked by year.
+                                Explore changes in the total number
+                                of appliances across different categories.
+
+                                Each coloured area represents an
+                                appliance category, measured in
+                                millions of units.
                             </p>
+
                         </div>
 
                         <label>
@@ -235,22 +264,25 @@
                     <div id="chart2" class="viz"></div>
 
                     <div class="note">
-                        Only appliance categories reported in the
-                        chosen country are shown. Missing data
-                        is not estimated as zero.
+                        Appliance stocks represent the estimated
+                        number of units in use. Only categories
+                        with complete observations across the
+                        selected years are included in this chart.
                     </div>
 
                 </div>
 
             </div>
+
         </section>
 
 
         <!-- ========================================
-             CHAPTER 2: COUNTRIES COMPARED
+             CHAPTER 2: COUNTRY COMPARISONS
         ======================================== -->
 
         <section id="comparison" class="chapter alt">
+
             <div class="container">
 
                 <div class="section-head">
@@ -265,21 +297,28 @@
                     </h2>
 
                     <p>
-                        Comparing country results can reveal
-                        differences in appliance uptake, but
-                        not necessarily why they exist.
+                        Household appliance adoption is not
+                        uniform around the world.
+
+                        Comparing countries helps identify
+                        differences in household appliance
+                        diffusion and highlights variation
+                        between appliance categories.
                     </p>
 
                 </div>
 
 
-                <!-- Chart 3: Country Heatmap -->
+                <!-- ========================================
+                     CHART 3: HEATMAP
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
                                 COMPARISON · HEATMAP
                             </span>
@@ -290,11 +329,14 @@
                             </h3>
 
                             <p>
-                                Each square shows the
-                                <strong>latest available</strong>
-                                reported diffusion value for that
-                                country and appliance.
+                                Compare household appliance diffusion
+                                across selected countries.
+
+                                Darker colours represent higher
+                                average numbers of appliances
+                                per dwelling.
                             </p>
+
                         </div>
 
                     </div>
@@ -302,34 +344,39 @@
                     <div id="chart3" class="viz"></div>
 
                     <div class="note">
-                        Country-appliance observations may refer
-                        to different years; hover for the exact
-                        reporting year.
+                        Values represent the latest available
+                        reported observation for each country
+                        and appliance. Reporting years may differ.
                     </div>
 
                 </div>
 
 
-                <!-- Chart 4: Country Ranking -->
+                <!-- ========================================
+                     CHART 4: DOT PLOT
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
                                 RANKING · DOT PLOT
                             </span>
 
                             <h3>
-                                How do countries compare on one appliance?
+                                How do countries compare
+                                on one appliance?
                             </h3>
 
                             <p>
-                                Select an appliance to see the most
-                                recent recorded diffusion
-                                (with reporting years in tooltips).
+                                Select an appliance category
+                                to compare countries based on
+                                their latest available diffusion values.
                             </p>
+
                         </div>
 
                         <label>
@@ -342,28 +389,31 @@
                     <div id="chart4" class="viz"></div>
 
                     <div class="note">
-                        This is a descriptive comparison, not an
-                        annual ranking: the latest year varies
-                        by country.
+                        Countries are ranked using their latest
+                        available observations from 2015 onwards.
+                        These observations may refer to
+                        different reporting years.
                     </div>
 
                 </div>
 
             </div>
+
         </section>
 
 
         <!-- ========================================
-             CHAPTER 3: OWNERSHIP PENETRATION
+             CHAPTER 3: HOUSEHOLD PENETRATION
         ======================================== -->
 
         <section class="chapter">
+
             <div class="container">
 
                 <div class="section-head">
 
                     <div class="count">
-                        03 <span>ANOTHER LENS</span>
+                        03 <span>HOUSEHOLD OWNERSHIP</span>
                     </div>
 
                     <h2>
@@ -372,24 +422,30 @@
                     </h2>
 
                     <p>
-                        Penetration reports the share of households
-                        owning an appliance. It is conceptually
-                        different from diffusion and cannot be
-                        directly combined on one numeric scale.
+                        Appliance penetration measures the
+                        proportion of households that own
+                        a particular appliance.
+
+                        Unlike diffusion, penetration describes
+                        household ownership rather than the
+                        average number of units per dwelling.
                     </p>
 
                 </div>
 
 
-                <!-- Chart 5: Penetration Heatmap -->
+                <!-- ========================================
+                     CHART 5: PENETRATION HEATMAP
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
-                                PERCENTAGE · HEATMAP
+                                OWNERSHIP · HEATMAP
                             </span>
 
                             <h3>
@@ -397,10 +453,14 @@
                             </h3>
 
                             <p>
-                                For economies with penetration records,
-                                colour represents the latest reported
-                                household ownership percentage.
+                                Explore differences in household
+                                appliance penetration across countries.
+
+                                Each cell represents the percentage
+                                of households owning a particular
+                                appliance category.
                             </p>
+
                         </div>
 
                     </div>
@@ -408,110 +468,122 @@
                     <div id="chart5" class="viz"></div>
 
                     <div class="note">
-                        Countries and years are restricted by
-                        data availability. White / blank cells
-                        indicate missing observations, not zero ownership.
+                        Values are taken from the latest available
+                        observations from 2015 onwards.
+                        Missing observations do not represent
+                        zero ownership.
                     </div>
 
                 </div>
 
             </div>
+
         </section>
 
 
         <!-- ========================================
-             CHAPTER 4: PRODUCT CHOICES
+             CHAPTER 4: APPLIANCE DIFFERENCES
         ======================================== -->
 
-        <section id="products" class="chapter alt">
+        <section id="differences" class="chapter alt">
+
             <div class="container">
 
                 <div class="section-head">
 
                     <div class="count">
-                        04 <span>FROM OWNERSHIP TO CHOICE</span>
+                        04 <span>UNDERSTANDING APPLIANCE DIFFERENCES</span>
                     </div>
 
                     <h2>
-                        What makes a product<br>
-                        worth choosing?
+                        How different are<br>
+                        our appliance habits?
                     </h2>
 
                     <p>
-                        This section is reserved for our second source:
-                        product-level appliance listings and reviews.
-                        It will compare brands, prices and customer
-                        ratings rather than national ownership.
+                        Beyond analysing appliance ownership
+                        individually, we can investigate changes
+                        over time, differences across countries,
+                        and relationships between appliance
+                        diffusion and total appliance stocks.
                     </p>
 
                 </div>
 
 
-                <!-- Chart 6: Price vs Rating -->
+                <!-- ========================================
+                     CHART 6: DUMBBELL CHART
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
-                                PRODUCT COMPARISON · PRICE VS RATING
+                                CHANGE OVER TIME · DUMBBELL CHART
                             </span>
 
                             <h3>
-                                Do higher-priced appliances
-                                receive better ratings?
+                                How much has appliance
+                                diffusion changed?
                             </h3>
 
                             <p>
-                                Once <code>data/products.csv</code>
-                                is added, each point represents an
-                                appliance listing. Use the category
-                                dropdown to compare products.
+                                Compare the earliest and latest
+                                recorded diffusion values for
+                                different appliance categories
+                                in Australia.
+
+                                Each connecting line shows the
+                                change between two observations.
                             </p>
+
                         </div>
-
-                        <label>
-                            CATEGORY
-
-                            <select id="productCategorySelect">
-                                <option>All categories</option>
-                            </select>
-                        </label>
 
                     </div>
 
                     <div id="chart6" class="viz"></div>
 
-                    <div id="productNotice" class="note">
-                        Awaiting the second dataset. No illustrative
-                        or invented customer ratings are displayed.
+                    <div class="note">
+                        Orange represents the earliest
+                        available observation, while teal
+                        represents the latest observation.
+
+                        The comparison period may vary
+                        between appliance categories.
                     </div>
 
                 </div>
 
 
-                <!-- Chart 7: Brand Comparison -->
+                <!-- ========================================
+                     CHART 7: BOX PLOT
+                ======================================== -->
 
                 <div class="chart-card">
 
                     <div class="chart-top">
 
                         <div>
+
                             <span class="tag">
-                                BRAND COMPARISON · BAR CHART
+                                DISTRIBUTION · BOX PLOT
                             </span>
 
                             <h3>
-                                Which brands have higher average
-                                reviewed scores?
+                                How much does appliance diffusion
+                                vary across countries?
                             </h3>
 
                             <p>
-                                Brand comparisons appear after
-                                product data is loaded. Only brands
-                                with sufficient review coverage
-                                should be interpreted.
+                                Box plots illustrate the distribution
+                                of appliance diffusion across
+                                countries for each appliance category.
+
+                                Compare the median, spread and
+                                potential outliers.
                             </p>
 
                         </div>
@@ -519,48 +591,63 @@
                     </div>
 
                     <div id="chart7" class="viz"></div>
-        
-                    <!-- ========================================
-                         CHART 8: STOCK VS DIFFUSION
-                    ======================================== -->
-                    
-                    <div class="chart-card">
-                    
-                        <div class="chart-top">
-                    
-                            <div>
-                                <span class="tag">
-                                    RELATIONSHIP · BUBBLE SCATTERPLOT
-                                </span>
-                    
-                                <h3>
-                                    How does appliance stock relate to
-                                    household diffusion?
-                                </h3>
-                    
-                                <p>
-                                    Each bubble represents a country and
-                                    appliance category. The chart compares
-                                    appliance stocks with the average number
-                                    of appliances per dwelling.
-                                </p>
-                            </div>
-                    
+
+                    <div class="note">
+                        The box plots use each country's latest
+                        available diffusion observation from
+                        2015 onwards. Reporting years may differ.
+                    </div>
+
+                </div>
+
+
+                <!-- ========================================
+                     CHART 8: BUBBLE SCATTERPLOT
+                ======================================== -->
+
+                <div class="chart-card">
+
+                    <div class="chart-top">
+
+                        <div>
+
+                            <span class="tag">
+                                RELATIONSHIP · BUBBLE SCATTERPLOT
+                            </span>
+
+                            <h3>
+                                How does appliance stock relate
+                                to household diffusion?
+                            </h3>
+
+                            <p>
+                                Examine the relationship between
+                                appliance stock and the average
+                                number of appliances per dwelling.
+
+                                Each bubble represents a country
+                                and appliance category.
+                            </p>
+
                         </div>
 
-    <div id="chart8" class="viz"></div>
+                    </div>
 
-    <div class="note">
-        The vertical axis uses a logarithmic scale.
-        Countries differ in population and household
-        counts, which strongly affect total stock.
-    </div>
+                    <div id="chart8" class="viz"></div>
 
-</div>
+                    <div class="note">
+                        The vertical axis uses a logarithmic scale.
+                        Total appliance stock is influenced by
+                        country size and household numbers.
+
+                        This relationship should not be interpreted
+                        as evidence of consumer preference.
+                    </div>
 
                 </div>
 
             </div>
+
         </section>
 
 
@@ -570,22 +657,30 @@
 
         <section class="conclusion container">
 
-            <span class="kicker">THE TAKEAWAY</span>
+            <span class="kicker">
+                THE TAKEAWAY
+            </span>
 
             <h2>
                 Appliance adoption is global.<br>
-                <em>Consumer choice is personal.</em>
+                <em>But ownership patterns differ.</em>
             </h2>
 
             <p>
-                The IEA data lets us compare long-run household
-                appliance uptake, but ownership metrics cannot
-                establish purchasing motivations, product quality
-                or brand preference.
+                The International Energy Agency's household
+                appliance data provides insights into changes
+                in appliance diffusion, ownership penetration,
+                and installed appliance stocks across countries.
 
-                Combining adoption data with properly sourced
-                product listings lets us explore both perspectives
-                without confusing them.
+                Together, these visualisations allow us to
+                investigate trends over time, compare
+                international patterns, and explore how
+                appliance adoption differs by category.
+
+                However, ownership and stock measures alone
+                cannot explain purchasing motivations,
+                customer satisfaction, brand preferences
+                or product quality.
             </p>
 
         </section>
@@ -597,90 +692,108 @@
 
         <section id="sources" class="sources container">
 
-            <h2>Sources and limitations</h2>
+            <h2>
+                Sources and limitations
+            </h2>
 
             <div class="source-grid">
 
-                <!-- Source 1: IEA -->
+                <!-- Dataset Source -->
 
                 <div>
-                    <h3>01 · Household ownership</h3>
+
+                    <h3>
+                        01 · International Energy Agency
+                    </h3>
 
                     <p>
                         International Energy Agency,
-                        <i>Household Appliances Database</i>,
+                        Household Appliances Database,
                         June 2026 pilot edition.
 
-                        Observations span 2000–2024,
-                        unevenly across countries and measures.
+                        The dataset contains appliance ownership
+                        and stock observations across countries
+                        over the period 2000–2024.
                     </p>
 
                     <a href="https://www.iea.org/data-and-statistics/data-product/household-appliances-database"
                        target="_blank"
                        rel="noopener">
-                        IEA dataset ↗
+                        IEA Dataset ↗
                     </a>
-                </div>
 
-
-                <!-- Source 2: Amazon Reviews -->
-
-                <div>
-                    <h3>02 · Product data (to add)</h3>
-
-                    <p>
-                        UC San Diego McAuley Lab,
-                        <i>Amazon Reviews 2023</i>,
-                        Appliances product metadata and reviews.
-
-                        The product section remains empty until
-                        a cleaned, source-attributed CSV is supplied.
-                    </p>
-
-                    <a href="https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023"
-                       target="_blank"
-                       rel="noopener">
-                        Amazon Reviews 2023 ↗
-                    </a>
                 </div>
 
 
                 <!-- Methodology -->
 
                 <div>
-                    <h3>Methodology</h3>
+
+                    <h3>
+                        02 · Methodology
+                    </h3>
 
                     <p>
-                        Stocks are expressed in millions of units;
-                        diffusion is average units per dwelling;
-                        penetration is a proportion.
+                        Three measures are used throughout
+                        the visualisation:
 
-                        Values are not interpolated, and
-                        cross-country latest-year comparisons
-                        may mix years.
+                        Diffusion represents the average number
+                        of appliances per dwelling.
 
-                        Retail product rating data does not
-                        measure sales volume.
+                        Penetration represents the proportion
+                        of households owning an appliance.
+
+                        Stocks represent the installed number
+                        of appliances in millions of units.
                     </p>
+
+                </div>
+
+
+                <!-- Limitations -->
+
+                <div>
+
+                    <h3>
+                        03 · Data Limitations
+                    </h3>
+
+                    <p>
+                        Data availability varies by country,
+                        appliance category and reporting year.
+
+                        The latest available observations
+                        are not necessarily from the same year.
+
+                        Appliance ownership and stocks do not
+                        directly measure sales, customer ratings,
+                        prices or purchasing motivations.
+                    </p>
+
                 </div>
 
 
                 <!-- Attribution -->
 
                 <div>
-                    <h3>Attribution</h3>
+
+                    <h3>
+                        04 · Attribution
+                    </h3>
 
                     <p>
-                        Student: Anoushka T Shanmugam, 35808500.
+                        Student: [Your Name / Student ID]
 
                         Course: FIT3179 Data Visualisation 2.
 
-                        Website created with Vega-Lite
-                        and Vega-Embed.
+                        Visualisations developed using
+                        Vega-Lite and Vega-Embed.
 
-                        Review your course policy before
-                        finalising the AI acknowledgement.
+                        Add any required academic or AI-use
+                        acknowledgements according to
+                        your course guidelines.
                     </p>
+
                 </div>
 
             </div>
@@ -695,7 +808,10 @@
     ======================================== -->
 
     <footer>
-        <span>BEHIND THE PLUG</span>
+
+        <span>
+            BEHIND THE PLUG
+        </span>
 
         <span>
             FIT3179 · DATA VISUALISATION 2 · 2026
@@ -704,10 +820,14 @@
         <a href="#top">
             Back to top ↑
         </a>
+
     </footer>
 
 
-    <!-- JavaScript -->
+    <!-- ========================================
+         JAVASCRIPT
+    ======================================== -->
+
     <script src="app.js"></script>
 
 </body>
