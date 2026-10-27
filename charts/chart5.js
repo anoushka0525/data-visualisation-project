@@ -1,8 +1,11 @@
 
 /* 
-   CHART 5: HOUSEHOLD APPLIANCE PENETRATION
-   Type: Heatmap
+   CHART 5: GEOGRAPHIC SPIKE MAP
+
+   Refrigerator Household Penetration
    Dataset: IEA Household Appliances
+
+   Taller spikes = higher ownership %
 */
 
 async function initChart5() {
@@ -16,139 +19,93 @@ async function initChart5() {
 
     try {
 
-        // Load dataset
-        const csvText = await vega.loader().load(
-            "data/iea_appliances.csv"
+        // =====================================
+        // 1. LOAD DATA
+        // =====================================
+
+        const rows = await getMapData(
+            "Penetration",
+            "Refrigerators"
         );
 
-        const rawData = vega.read(csvText, {
-            type: "csv"
-        });
-
-        // Filter valid penetration records
-        const penetrationData = rawData
-            .filter(d =>
-                String(d.metric).trim().toLowerCase() ===
-                    "penetration" &&
-                d.country &&
-                d.appliance &&
-                Number(d.year) >= 2015 &&
-                String(d.value).trim() !== "" &&
-                Number.isFinite(Number(d.value)) &&
-                Number(d.value) >= 0
-            )
-            .map(d => ({
-                country: String(d.country).trim(),
-                appliance: String(d.appliance).trim(),
-                year: Number(d.year),
-                value: Number(d.value)
-            }));
-
-        // Keep latest observation for each
-        // country and appliance combination
-        const latestRecords = new Map();
-
-        penetrationData.forEach(d => {
-
-            const key = JSON.stringify([
-                d.country,
-                d.appliance
-            ]);
-
-            const existing = latestRecords.get(key);
-
-            if (!existing || d.year > existing.year) {
-                latestRecords.set(key, d);
-            }
-        });
-
-        const latestData = [...latestRecords.values()];
-
-        if (!latestData.length) {
+        if (!rows.length) {
             throw new Error(
-                "No penetration observations found."
+                "No refrigerator penetration data found."
             );
         }
 
-        // Rank countries by data completeness
-        const countryCounts = {};
+        // =====================================
+        // 2. PREPARE SPIKE DATA
+        // =====================================
 
-        latestData.forEach(d => {
-            countryCounts[d.country] =
-                (countryCounts[d.country] || 0) + 1;
-        });
+        // Penetration is stored between 0 and 1.
+        // Convert it to percentages.
 
-        // Select 10 countries with the most
-        // available appliance categories
-        const selectedCountries = Object.keys(countryCounts)
-            .sort((a, b) =>
-                countryCounts[b] - countryCounts[a] ||
-                a.localeCompare(b)
+        const data = rows
+            .filter(d =>
+                Number.isFinite(d.lat) &&
+                Number.isFinite(d.lon) &&
+                Number.isFinite(d.value) &&
+                d.value >= 0 &&
+                d.value <= 1
             )
-            .slice(0, 10);
+            .map(d => ({
 
-        // Keep data for selected countries
-        const selectedData = latestData.filter(d =>
-            selectedCountries.includes(d.country)
-        );
+                country: d.country,
 
-        // Determine percentage units
-        // Supports either 0 to 1 or 0 to 100 values
-        const maxValue = Math.max(
-            ...selectedData.map(d => d.value)
-        );
+                lon: d.lon,
 
-        const multiplier = maxValue <= 1 ? 100 : 1;
+                lat: d.lat,
 
-        selectedData.forEach(d => {
-            d.percentage = d.value * multiplier;
-        });
+                year: d.year,
 
-        // Get appliance categories
-        const appliances = [
-            ...new Set(
-                selectedData.map(d => d.appliance)
-            )
-        ].sort();
+                percentage: d.value * 100,
 
-        // Build country-appliance lookup
-        const lookup = new Map(
-            selectedData.map(d => [
-                JSON.stringify([
-                    d.country,
-                    d.appliance
-                ]),
-                d
-            ])
-        );
+                // End latitude for spike
+                topLat: Math.min(
+                    85,
+                    d.lat + d.value * 14
+                )
 
-        // Create complete heatmap grid
-        // Missing observations remain null
-        const fullGrid = [];
+            }));
 
-        selectedCountries.forEach(country => {
+        if (!data.length) {
+            throw new Error(
+                "No valid geographic observations."
+            );
+        }
 
-            appliances.forEach(appliance => {
+        // Create two geographic points per spike:
+        // the base and the upper endpoint.
 
-                const key = JSON.stringify([
-                    country,
-                    appliance
-                ]);
+        const spikePoints = [];
 
-                const record = lookup.get(key);
+        data.forEach(d => {
 
-                fullGrid.push(
-                    record || {
-                        country,
-                        appliance,
-                        year: null,
-                        percentage: null
-                    }
-                );
+            spikePoints.push({
+                country: d.country,
+                lon: d.lon,
+                lat: d.lat,
+                order: 0,
+                percentage: d.percentage,
+                year: d.year
             });
+
+            spikePoints.push({
+                country: d.country,
+                lon: d.lon,
+                lat: d.topLat,
+                order: 1,
+                percentage: d.percentage,
+                year: d.year
+            });
+
         });
 
-        // Vega-Lite specification
+        // =====================================
+        // 3. CREATE VEGA-LITE MAP
+        // =====================================
+
         const spec = {
 
             "$schema":
@@ -156,96 +113,147 @@ async function initChart5() {
 
             width: "container",
 
-            height: {
-                step: 38
-            },
+            height: 420,
 
             background: "transparent",
 
-            data: {
-                values: fullGrid
+            projection: {
+                type: "equalEarth"
             },
 
-            mark: {
-                type: "rect",
-                stroke: "#ffffff",
-                strokeWidth: 2,
-                cornerRadius: 3
-            },
+            layer: [
 
-            encoding: {
+                // ---------------------------------
+                // WORLD MAP BACKGROUND
+                // ---------------------------------
 
-                x: {
-                    field: "appliance",
-                    type: "nominal",
-                    title: "Appliance Category",
-                    sort: appliances,
+                {
+                    data: {
+                        url: GEO_URL,
+                        format: {
+                            type: "topojson",
+                            feature: "countries"
+                        }
+                    },
 
-                    axis: {
-                        labelAngle: -35,
-                        labelLimit: 180,
-                        labelFontSize: 12,
-                        labelPadding: 10,
-                        grid: false
+                    mark: {
+                        type: "geoshape",
+                        fill: "#e8eef0",
+                        stroke: "#ffffff",
+                        strokeWidth: 0.5
                     }
                 },
 
-                y: {
-                    field: "country",
-                    type: "nominal",
-                    title: null,
-                    sort: selectedCountries,
+                // ---------------------------------
+                // GEOGRAPHIC SPIKES
+                // ---------------------------------
 
-                    axis: {
-                        labelFontSize: 12,
-                        labelLimit: 180,
-                        grid: false
+                {
+                    data: {
+                        values: spikePoints
+                    },
+
+                    mark: {
+                        type: "line",
+                        color: "#D55E00",
+                        strokeWidth: 3,
+                        opacity: 0.9
+                    },
+
+                    encoding: {
+
+                        longitude: {
+                            field: "lon",
+                            type: "quantitative"
+                        },
+
+                        latitude: {
+                            field: "lat",
+                            type: "quantitative"
+                        },
+
+                        detail: {
+                            field: "country",
+                            type: "nominal"
+                        },
+
+                        order: {
+                            field: "order",
+                            type: "quantitative"
+                        },
+
+                        tooltip: [
+                            {
+                                field: "country",
+                                type: "nominal",
+                                title: "Country"
+                            },
+                            {
+                                field: "percentage",
+                                type: "quantitative",
+                                title: "Household Ownership (%)",
+                                format: ".1f"
+                            },
+                            {
+                                field: "year",
+                                type: "quantitative",
+                                title: "Reporting Year",
+                                format: "d"
+                            }
+                        ]
                     }
                 },
 
-                color: {
-                    field: "percentage",
-                    type: "quantitative",
+                // ---------------------------------
+                // BASE LOCATION DOTS
+                // ---------------------------------
 
-                    title: "Households owning (%)",
-
-                    scale: {
-                        scheme: "tealblues",
-                        domain: [0, 100]
+                {
+                    data: {
+                        values: data
                     },
 
-                    legend: {
-                        orient: "bottom",
-                        gradientLength: 260,
-                        format: ".0f"
+                    mark: {
+                        type: "circle",
+                        color: "#172c34",
+                        size: 35,
+                        opacity: 0.9
+                    },
+
+                    encoding: {
+
+                        longitude: {
+                            field: "lon",
+                            type: "quantitative"
+                        },
+
+                        latitude: {
+                            field: "lat",
+                            type: "quantitative"
+                        },
+
+                        tooltip: [
+                            {
+                                field: "country",
+                                type: "nominal",
+                                title: "Country"
+                            },
+                            {
+                                field: "percentage",
+                                type: "quantitative",
+                                title: "Household Ownership (%)",
+                                format: ".1f"
+                            },
+                            {
+                                field: "year",
+                                type: "quantitative",
+                                title: "Reporting Year",
+                                format: "d"
+                            }
+                        ]
                     }
-                },
-
-                tooltip: [
-                    {
-                        field: "country",
-                        type: "nominal",
-                        title: "Country"
-                    },
-                    {
-                        field: "appliance",
-                        type: "nominal",
-                        title: "Appliance"
-                    },
-                    {
-                        field: "percentage",
-                        type: "quantitative",
-                        title: "Households owning (%)",
-                        format: ".1f"
-                    },
-                    {
-                        field: "year",
-                        type: "quantitative",
-                        title: "Reporting Year",
-                        format: "d"
-                    }
-                ]
-            },
+                }
+            ],
 
             config: {
 
@@ -255,22 +263,20 @@ async function initChart5() {
 
                 axis: {
                     labelFont: "DM Sans",
-                    titleFont: "DM Sans",
-                    labelFontSize: 12,
-                    titleFontSize: 13,
-                    domain: false,
-                    ticks: false
+                    titleFont: "DM Sans"
                 },
 
                 legend: {
                     labelFont: "DM Sans",
-                    titleFont: "DM Sans",
-                    labelFontSize: 12
+                    titleFont: "DM Sans"
                 }
             }
         };
 
-        // Render heatmap
+        // =====================================
+        // 4. RENDER MAP
+        // =====================================
+
         await vegaEmbed("#chart5", spec, {
 
             renderer: "svg",
@@ -288,9 +294,9 @@ async function initChart5() {
         console.error("Chart 5 error:", error);
 
         container.textContent =
-            "Unable to load Chart 5: " + error.message;
+            "Unable to load Chart 5: " +
+            error.message;
     }
 }
 
 initChart5();
-
