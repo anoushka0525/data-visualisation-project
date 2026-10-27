@@ -1,363 +1,465 @@
 
-/* 
-   CHART 8: APPLIANCE STOCK VS DIFFUSION
-   Type: Bubble Scatter Plot 
-   Dataset: IEA Household Appliances
-*/
+/*
+   CHART 8: STOCK DISTRIBUTION SANKEY
+   IEA Household Appliances - 2022
+
+   Bands show quantities by appliance and
+   country, NOT physical flows.
+   */
 
 async function initChart8() {
 
-    const container = document.getElementById("chart8");
-
-    if (!container) {
-        console.error("Chart 8 container not found.");
-        return;
-    }
+    const target = document.getElementById("chart8");
+    if (!target) return;
 
     try {
 
-        // =====================================
-        // 1. LOAD DATASET
-        // =====================================
-
-        const csvText = await vega.loader().load(
+        // 1. LOAD IEA DATA
+        const csv = await vega.loader().load(
             "data/iea_appliances.csv"
         );
 
-        const rawData = vega.read(csvText, {
+        const raw = vega.read(csv, {
             type: "csv"
         });
 
-        // Filter valid diffusion and stock records
-        const filteredData = rawData
-            .filter(d =>
-                ["diffusion", "stocks"].includes(
-                    String(d.metric).trim().toLowerCase()
-                ) &&
-                d.country &&
-                d.appliance &&
-                Number(d.year) >= 2015 &&
-                Number.isInteger(Number(d.year)) &&
-                String(d.value).trim() !== "" &&
-                Number.isFinite(Number(d.value)) &&
-                Number(d.value) > 0
-            )
-            .map(d => ({
-                country: String(d.country).trim(),
-                appliance: String(d.appliance).trim(),
-                metric: String(d.metric)
-                    .trim().toLowerCase(),
-                year: Number(d.year),
-                value: Number(d.value)
-            }));
+        const year = 2022;
 
-        // =====================================
-        // 2. MATCH STOCKS AND DIFFUSION
-        // =====================================
+        const rows = raw.filter(d =>
+            String(d.metric).trim().toLowerCase() === "stocks" &&
+            Number(d.year) === year &&
+            d.country &&
+            d.appliance &&
+            String(d.value).trim() !== "" &&
+            Number.isFinite(Number(d.value)) &&
+            Number(d.value) > 0
+        ).map(d => ({
+            country: String(d.country).trim(),
+            appliance: String(d.appliance).trim(),
+            value: Number(d.value)
+        }));
 
-        // Match by country, appliance and year
-        const matchedRecords = new Map();
-
-        filteredData.forEach(d => {
-
-            const key = JSON.stringify([
-                d.country,
-                d.appliance,
-                d.year
-            ]);
-
-            if (!matchedRecords.has(key)) {
-                matchedRecords.set(key, {
-                    country: d.country,
-                    appliance: d.appliance,
-                    year: d.year
-                });
-            }
-
-            const record = matchedRecords.get(key);
-
-            if (d.metric === "diffusion") {
-                record.diffusion = d.value;
-            }
-
-            if (d.metric === "stocks") {
-                record.stocks = d.value;
-            }
-        });
-
-        const validRecords = [
-            ...matchedRecords.values()
-        ].filter(d =>
-            Number.isFinite(d.diffusion) &&
-            Number.isFinite(d.stocks) &&
-            d.diffusion > 0 &&
-            d.stocks > 0
-        );
-
-        // Latest matching year per country-appliance
-        const latestRecords = new Map();
-
-        validRecords.forEach(d => {
-
-            const key = JSON.stringify([
-                d.country,
-                d.appliance
-            ]);
-
-            const previous = latestRecords.get(key);
-
-            if (!previous || d.year > previous.year) {
-                latestRecords.set(key, d);
-            }
-        });
-
-        const chartData = [...latestRecords.values()];
-
-        if (!chartData.length) {
-            throw new Error(
-                "No matching stock and diffusion records."
-            );
+        if (!rows.length) {
+            throw new Error("No valid stock data for 2022.");
         }
 
-        // =====================================
-        // 3. ACCESSIBLE APPLIANCE COLOURS
-        // =====================================
+        // 2. CHOOSE SIX COUNTRIES
+        // Ranked by their reported stock totals.
 
-        const preferredOrder = [
-            "Clothes dryers",
-            "Clothes washers",
-            "Dish washers",
-            "Freezers",
-            "PC/Information & communication",
-            "Refrigerator/freezer combinations",
-            "Televisions"
-        ];
+        const countryTotals = new Map();
 
-        const preferredColours = [
-            "#0072B2", // Blue
-            "#E69F00", // Orange
-            "#CC79A7", // Reddish purple
-            "#56B4E9", // Sky blue
-            "#009E73", // Bluish green
-            "#D55E00", // Vermillion
-            "#555555"  // Dark grey
-        ];
+        rows.forEach(d => {
+            countryTotals.set(
+                d.country,
+                (countryTotals.get(d.country) || 0) + d.value
+            );
+        });
 
-        const colourLookup = new Map(
-            preferredOrder.map((name, index) => [
-                name,
-                preferredColours[index]
-            ])
+        const countries = [...countryTotals.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6)
+            .map(d => d[0]);
+
+        const selectedRows = rows.filter(d =>
+            countries.includes(d.country)
         );
 
-        const extraColours = [
+        // 3. SUM STOCKS BY APPLIANCE
+
+        const applianceTotals = new Map();
+
+        selectedRows.forEach(d => {
+            applianceTotals.set(
+                d.appliance,
+                (applianceTotals.get(d.appliance) || 0) + d.value
+            );
+        });
+
+        const appliances = [...applianceTotals.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .map(d => d[0]);
+
+        const total = selectedRows.reduce(
+            (sum, d) => sum + d.value, 0
+        );
+
+        if (total <= 0) {
+            throw new Error("No positive stocks to plot.");
+        }
+
+        // 4. LAYOUT AND ACCESSIBLE COLOURS
+
+        const W = Math.max(
+            650,
+            Math.min(target.clientWidth || 880, 1100)
+        );
+
+        const H = 540;
+        const top = 26;
+        const bottom = 470;
+
+        const leftX = 205;
+        const rightX = W - 180;
+        const nodeW = 12;
+        const gap = 8;
+
+        const countMax = Math.max(
+            appliances.length,
+            countries.length
+        );
+
+        const scale = (
+            bottom - top - (countMax - 1) * gap
+        ) / total;
+
+        const colours = [
+            "#0072B2",
+            "#E69F00",
+            "#CC79A7",
+            "#56B4E9",
+            "#009E73",
+            "#D55E00",
+            "#555555",
             "#332288",
-            "#88CCEE",
-            "#AA4499",
             "#999933"
         ];
 
-        const allAppliances = [
-            ...new Set(
-                chartData.map(d => d.appliance)
-            )
-        ].sort();
+        const categories = new Map(
+            appliances.map((a, i) => [
+                a,
+                colours[i % colours.length]
+            ])
+        );
 
-        const applianceOrder = [
-            ...preferredOrder.filter(a =>
-                allAppliances.includes(a)
-            ),
-            ...allAppliances.filter(a =>
-                !preferredOrder.includes(a)
-            )
-        ];
+        // 5. CREATE APPLIANCE AND COUNTRY NODES
 
-        let extraIndex = 0;
+        const leftNodes = new Map();
+        const rightNodes = new Map();
 
-        applianceOrder.forEach(appliance => {
+        let cursor = top;
 
-            if (!colourLookup.has(appliance)) {
-                colourLookup.set(
-                    appliance,
-                    extraColours[
-                        extraIndex % extraColours.length
-                    ]
-                );
+        appliances.forEach(a => {
+            const amount = applianceTotals.get(a);
+            const height = amount * scale;
 
-                extraIndex++;
-            }
+            leftNodes.set(a, {
+                name: a,
+                x: leftX,
+                y: cursor,
+                height,
+                total: amount,
+                offset: 0,
+                colour: categories.get(a),
+                side: "left"
+            });
+
+            cursor += height + gap;
         });
 
-        // =====================================
-        // 4. VEGA-LITE SPECIFICATION
-        // =====================================
+        cursor = top;
+
+        countries.forEach(c => {
+
+            const amount = selectedRows
+                .filter(d => d.country === c)
+                .reduce((sum, d) => sum + d.value, 0);
+
+            const height = amount * scale;
+
+            rightNodes.set(c, {
+                name: c,
+                x: rightX,
+                y: cursor,
+                height,
+                total: amount,
+                offset: 0,
+                colour: "#607E88",
+                side: "right"
+            });
+
+            cursor += height + gap;
+        });
+
+        // 6. CREATE CONNECTING BANDS
+
+        const links = [];
+
+        appliances.forEach(a => {
+            countries.forEach(c => {
+
+                const value = selectedRows
+                    .filter(d =>
+                        d.appliance === a &&
+                        d.country === c
+                    )
+                    .reduce((sum, d) => sum + d.value, 0);
+
+                if (value <= 0) return;
+
+                const s = leftNodes.get(a);
+                const t = rightNodes.get(c);
+
+                const h = value * scale;
+
+                const x0 = leftX + nodeW;
+                const x1 = rightX;
+                const dx = (x1 - x0) * 0.48;
+
+                const y0 = s.y + s.offset;
+                const y1 = t.y + t.offset;
+
+                // Curved ribbon
+                const path =
+                    `M${x0},${y0} ` +
+                    `C${x0 + dx},${y0} ` +
+                    `${x1 - dx},${y1} ${x1},${y1} ` +
+                    `L${x1},${y1 + h} ` +
+                    `C${x1 - dx},${y1 + h} ` +
+                    `${x0 + dx},${y0 + h} ` +
+                    `${x0},${y0 + h} Z`;
+
+                links.push({
+                    source: a,
+                    target: c,
+                    value,
+                    path,
+                    colour: categories.get(a),
+                    tooltip:
+                        `${a} → ${c}: ` +
+                        `${value.toFixed(2)} million units (2022)`
+                });
+
+                s.offset += h;
+                t.offset += h;
+            });
+        });
+
+        // 7. PREPARE NODE LABELS
+
+        const nodes = [
+            ...leftNodes.values(),
+            ...rightNodes.values()
+        ].map(n => ({
+            ...n,
+
+            labelX: n.side === "left"
+                ? n.x - 8
+                : n.x + nodeW + 8,
+
+            align: n.side === "left"
+                ? "right"
+                : "left",
+
+            tooltip:
+                `${n.name}: ` +
+                `${n.total.toFixed(2)} million units (2022)`
+        }));
+
+        // 8. VEGA SPECIFICATION
 
         const spec = {
 
             "$schema":
-                "https://vega.github.io/schema/vega-lite/v6.json",
+                "https://vega.github.io/schema/vega/v6.json",
 
-            width: "container",
-            height: 460,
+            width: W,
+            height: H,
+            padding: 0,
 
             background: "transparent",
 
-            data: {
-                values: chartData
-            },
-
-            mark: {
-                type: "circle",
-                opacity: 0.75,
-                stroke: "#26383f",
-                strokeWidth: 0.8
-            },
-
-            encoding: {
-
-                x: {
-                    field: "diffusion",
-                    type: "quantitative",
-
-                    title:
-                        "Average appliances per dwelling",
-
-                    scale: {
-                        zero: true
-                    },
-
-                    axis: {
-                        grid: true,
-                        gridColor: "#e5e7eb",
-                        tickCount: 7
-                    }
-                },
-
-                y: {
-                    field: "stocks",
-                    type: "quantitative",
-
-                    title:
-                        "Installed appliance stock (millions)",
-
-                    scale: {
-                        type: "log"
-                    },
-
-                    axis: {
-                        grid: true,
-                        gridColor: "#e5e7eb",
-                        format: "~g"
-                    }
-                },
-
-                color: {
-                    field: "appliance",
-                    type: "nominal",
-
-                    title: "Appliance Category",
-
-                    scale: {
-                        domain: applianceOrder,
-                        range: applianceOrder.map(
-                            a => colourLookup.get(a)
-                        )
-                    },
-
-                    legend: {
-                        orient: "bottom",
-                        columns: 2,
-                        labelLimit: 350,
-                        symbolSize: 130
-                    }
-                },
-
-                size: {
-                    field: "stocks",
-                    type: "quantitative",
-
-                    title: "Stock (millions)",
-
-                    scale: {
-                        range: [45, 1000]
-                    },
-
-                    legend: null
-                },
-
-                tooltip: [
-                    {
-                        field: "country",
-                        type: "nominal",
-                        title: "Country"
-                    },
-                    {
-                        field: "appliance",
-                        type: "nominal",
-                        title: "Appliance"
-                    },
-                    {
-                        field: "year",
-                        type: "quantitative",
-                        title: "Reporting Year",
-                        format: "d"
-                    },
-                    {
-                        field: "diffusion",
-                        type: "quantitative",
-                        title: "Diffusion",
-                        format: ".3f"
-                    },
-                    {
-                        field: "stocks",
-                        type: "quantitative",
-                        title: "Stock (millions)",
-                        format: ",.2f"
-                    }
-                ]
-            },
-
-            // =====================================
-            // 5. INTERACTIVE ZOOM
-            // =====================================
-
-            params: [
+            data: [
                 {
-                    name: "chart8Zoom",
-                    select: {
-                        type: "interval",
-                        bind: "scales",
-                        encodings: ["x", "y"]
-                    }
+                    name: "links",
+                    values: links
+                },
+                {
+                    name: "nodes",
+                    values: nodes
                 }
             ],
 
-            config: {
+            marks: [
 
-                view: {
-                    stroke: null
+                // Sankey ribbons
+                {
+                    type: "path",
+
+                    from: {
+                        data: "links"
+                    },
+
+                    encode: {
+                        enter: {
+                            path: {
+                                field: "path"
+                            },
+
+                            fill: {
+                                field: "colour"
+                            },
+
+                            fillOpacity: {
+                                value: 0.48
+                            },
+
+                            stroke: {
+                                value: "#ffffff"
+                            },
+
+                            strokeWidth: {
+                                value: 0.25
+                            },
+
+                            tooltip: {
+                                field: "tooltip"
+                            }
+                        },
+
+                        hover: {
+                            fillOpacity: {
+                                value: 0.84
+                            }
+                        }
+                    }
                 },
 
-                axis: {
-                    labelFont: "DM Sans",
-                    titleFont: "DM Sans",
-                    labelFontSize: 12,
-                    titleFontSize: 13,
-                    titlePadding: 12
+                // Appliance and country nodes
+                {
+                    type: "rect",
+
+                    from: {
+                        data: "nodes"
+                    },
+
+                    encode: {
+                        enter: {
+                            x: { field: "x" },
+                            y: { field: "y" },
+
+                            width: { value: nodeW },
+                            height: { field: "height" },
+
+                            fill: { field: "colour" },
+
+                            tooltip: {
+                                field: "tooltip"
+                            }
+                        }
+                    }
                 },
 
-                legend: {
-                    labelFont: "DM Sans",
-                    titleFont: "DM Sans",
-                    labelFontSize: 12,
-                    titleFontSize: 13
+                // Node labels
+                {
+                    type: "text",
+
+                    from: {
+                        data: "nodes"
+                    },
+
+                    encode: {
+                        enter: {
+                            x: { field: "labelX" },
+
+                            y: {
+                                signal:
+                                    "datum.y + datum.height / 2"
+                            },
+
+                            text: { field: "name" },
+
+                            align: { field: "align" },
+
+                            baseline: {
+                                value: "middle"
+                            },
+
+                            font: {
+                                value: "DM Sans"
+                            },
+
+                            fontSize: {
+                                value: 11
+                            },
+
+                            fill: {
+                                value: "#243740"
+                            },
+
+                            tooltip: {
+                                field: "tooltip"
+                            }
+                        }
+                    }
+                },
+
+                // Left column heading
+                {
+                    type: "text",
+
+                    encode: {
+                        enter: {
+                            x: { value: leftX },
+                            y: { value: 10 },
+
+                            text: {
+                                value: "APPLIANCE CATEGORIES"
+                            },
+
+                            align: {
+                                value: "center"
+                            },
+
+                            fontSize: {
+                                value: 12
+                            },
+
+                            fontWeight: {
+                                value: "bold"
+                            },
+
+                            fill: {
+                                value: "#52636b"
+                            }
+                        }
+                    }
+                },
+
+                // Right column heading
+                {
+                    type: "text",
+
+                    encode: {
+                        enter: {
+                            x: { value: rightX },
+                            y: { value: 10 },
+
+                            text: {
+                                value: "COUNTRIES"
+                            },
+
+                            align: {
+                                value: "center"
+                            },
+
+                            fontSize: {
+                                value: 12
+                            },
+
+                            fontWeight: {
+                                value: "bold"
+                            },
+
+                            fill: {
+                                value: "#52636b"
+                            }
+                        }
+                    }
                 }
-            }
+            ]
         };
 
-        // =====================================
-        // 6. RENDER CHART
-        // =====================================
+        // 9. RENDER SANKEY DIAGRAM
 
         await vegaEmbed("#chart8", spec, {
 
@@ -375,10 +477,9 @@ async function initChart8() {
 
         console.error("Chart 8 error:", error);
 
-        container.textContent =
+        target.textContent =
             "Unable to load Chart 8: " + error.message;
     }
 }
 
 initChart8();
-
