@@ -1,7 +1,7 @@
 
 /* 
    CHART 8: APPLIANCE STOCK VS DIFFUSION
-   Type: Bubble Scatter Plot
+   Type: Bubble Scatter Plot 
    Dataset: IEA Household Appliances
 */
 
