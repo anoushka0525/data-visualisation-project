@@ -1,32 +1,40 @@
-/*
+
+/* 
    CHART 2: INSTALLED APPLIANCE STOCK
+
    Type: Stacked Area Chart
    Dataset: IEA Household Appliances
-*/
-
-const chart2Data = "data/iea_appliances.csv";
+ */
 
 async function initChart2() {
 
-    const countrySelect =
+    const container =
+        document.getElementById("chart2");
+
+    const dropdown =
         document.getElementById("stocksCountrySelect");
 
-    const chartContainer =
-        document.getElementById("chart2");
+    if (!container || !dropdown) {
+        console.error("Chart 2 HTML elements not found.");
+        return;
+    }
 
     try {
 
-        // Load the CSV file
-        const loader = vega.loader();
+        // =====================================
+        // 1. LOAD DATASET
+        // =====================================
 
-        const csvText = await loader.load(chart2Data);
+        const csvText = await vega.loader().load(
+            "data/iea_appliances.csv"
+        );
 
-        const data = vega.read(csvText, {
+        const rawData = vega.read(csvText, {
             type: "csv"
         });
 
-        // Keep only Stocks observations
-        const stocksData = data
+        // Keep valid Stocks observations
+        const stocksData = rawData
             .filter(d =>
                 String(d.metric).trim().toLowerCase()
                     === "stocks" &&
@@ -46,18 +54,21 @@ async function initChart2() {
 
         if (!stocksData.length) {
             throw new Error(
-                "No valid Stocks records found."
+                "No valid Stocks observations found."
             );
         }
 
-        // Extract country names
+        // =====================================
+        // 2. COUNTRY DROPDOWN
+        // =====================================
+
         const countries = [
             ...new Set(
                 stocksData.map(d => d.country)
             )
         ].sort();
 
-        countrySelect.innerHTML = "";
+        dropdown.innerHTML = "";
 
         countries.forEach(country => {
 
@@ -67,44 +78,104 @@ async function initChart2() {
             option.value = country;
             option.textContent = country;
 
-            countrySelect.appendChild(option);
-
+            dropdown.appendChild(option);
         });
 
-        // Australia as the default
         const defaultCountry =
             countries.find(c =>
                 c.toLowerCase() === "australia"
             ) || countries[0];
 
-        countrySelect.value = defaultCountry;
+        dropdown.value = defaultCountry;
 
+        // =====================================
+        // 3. ACCESSIBLE COLOUR PALETTE
+        // =====================================
 
-        // Render chart for selected country
+        const preferredOrder = [
+            "Clothes dryers",
+            "Clothes washers",
+            "Dish washers",
+            "Freezers",
+            "PC/Information & communication",
+            "Refrigerator/freezer combinations",
+            "Televisions"
+        ];
+
+        const preferredColours = [
+            "#0072B2", // Blue
+            "#E69F00", // Orange
+            "#CC79A7", // Reddish purple
+            "#56B4E9", // Sky blue
+            "#009E73", // Bluish green
+            "#D55E00", // Vermillion
+            "#555555"  // Dark grey
+        ];
+
+        const colourLookup = new Map(
+            preferredOrder.map((name, index) => [
+                name,
+                preferredColours[index]
+            ])
+        );
+
+        const extraColours = [
+            "#332288",
+            "#88CCEE",
+            "#AA4499",
+            "#117733",
+            "#999933"
+        ];
+
+        const allAppliances = [
+            ...new Set(stocksData.map(d => d.appliance))
+        ].sort();
+
+        const applianceOrder = [
+            ...preferredOrder.filter(a =>
+                allAppliances.includes(a)
+            ),
+            ...allAppliances.filter(a =>
+                !preferredOrder.includes(a)
+            )
+        ];
+
+        let extraIndex = 0;
+
+        applianceOrder.forEach(appliance => {
+            if (!colourLookup.has(appliance)) {
+                colourLookup.set(
+                    appliance,
+                    extraColours[
+                        extraIndex % extraColours.length
+                    ]
+                );
+                extraIndex++;
+            }
+        });
+
+        // =====================================
+        // 4. DRAW STACKED AREA CHART
+        // =====================================
+
         async function renderChart(country) {
 
             const countryData = stocksData.filter(
                 d => d.country === country
             );
 
-            // Identify years with reported data
             const years = [
                 ...new Set(
                     countryData.map(d => d.year)
                 )
             ].sort((a, b) => a - b);
 
-            // Keep categories with an observation
-            // in every selected year.
-            // This avoids treating missing data as 0.
-            const categories = [
-                ...new Set(
-                    countryData.map(d => d.appliance)
-                )
-            ];
+            // Keep only categories reported
+            // in every available year.
+            // Missing records are not treated as zero.
 
             const completeCategories =
-                categories.filter(appliance => {
+                applianceOrder.filter(appliance => {
 
                     const observedYears = new Set(
                         countryData
@@ -119,42 +190,99 @@ async function initChart2() {
                     );
                 });
 
-            const filtered = countryData.filter(d =>
-                completeCategories.includes(d.appliance)
-            );
-
-            if (!filtered.length) {
-
-                chartContainer.textContent =
-                    "No complete appliance series " +
+            if (!completeCategories.length) {
+                container.textContent =
+                    "No complete appliance stock series " +
                     "available for this country.";
-
                 return;
             }
 
+            // =================================
+            // 5. AGGREGATE STOCK VALUES
+            // =================================
+
+            const aggregated = new Map();
+
+            countryData.forEach(d => {
+
+                if (!completeCategories.includes(
+                    d.appliance
+                )) {
+                    return;
+                }
+
+                const key = JSON.stringify([
+                    d.year,
+                    d.appliance
+                ]);
+
+                aggregated.set(
+                    key,
+                    (aggregated.get(key) || 0) + d.value
+                );
+            });
+
+            // =================================
+            // 6. CALCULATE STACK BOUNDARIES
+            // =================================
+
+            // Explicit y0 and y1 boundaries
+            // prevent gaps between stacked areas.
+
+            const stackedData = [];
+
+            years.forEach(year => {
+
+                let cumulative = 0;
+
+                completeCategories.forEach(appliance => {
+
+                    const key = JSON.stringify([
+                        year,
+                        appliance
+                    ]);
+
+                    const stock =
+                        aggregated.get(key) || 0;
+
+                    const y0 = cumulative;
+                    const y1 = cumulative + stock;
+
+                    stackedData.push({
+                        year: year,
+                        appliance: appliance,
+                        stock: stock,
+                        y0: y0,
+                        y1: y1
+                    });
+
+                    cumulative = y1;
+                });
+            });
+
+            // =================================
+            // 7. VEGA-LITE SPECIFICATION
+            // =================================
+
             const spec = {
 
-                $schema:
+                "$schema":
                     "https://vega.github.io/schema/vega-lite/v6.json",
 
                 width: "container",
-                height: 400,
-
-                autosize: {
-                    type: "fit",
-                    contains: "padding"
-                },
+                height: 420,
 
                 background: "transparent",
 
                 data: {
-                    values: filtered
+                    values: stackedData
                 },
 
                 mark: {
                     type: "area",
-                    opacity: 0.9,
-                    interpolate: "linear"
+                    opacity: 1,
+                    interpolate: "linear",
+                    strokeWidth: 0
                 },
 
                 encoding: {
@@ -171,23 +299,33 @@ async function initChart2() {
                         axis: {
                             format: "d",
                             tickMinStep: 1,
-                            grid: false,
-                            labelAngle: 0
+                            labelAngle: 0,
+                            grid: false
                         }
                     },
 
+                    // Upper boundary of area
                     y: {
-                        field: "value",
+                        field: "y1",
                         type: "quantitative",
-                        aggregate: "sum",
-                        stack: "zero",
 
                         title:
                             "Installed appliance stock (millions)",
 
                         scale: {
                             zero: true
+                        },
+
+                        axis: {
+                            grid: true,
+                            gridColor: "#e5e7eb",
+                            tickCount: 7
                         }
+                    },
+
+                    // Lower boundary of area
+                    y2: {
+                        field: "y0"
                     },
 
                     color: {
@@ -196,21 +334,24 @@ async function initChart2() {
 
                         title: "Appliance Category",
 
+                        scale: {
+                            domain: applianceOrder,
+                            range: applianceOrder.map(
+                                a => colourLookup.get(a)
+                            )
+                        },
+
                         legend: {
                             orient: "bottom",
                             columns: 2,
-                            labelLimit: 300
-                        },
-
-                        scale: {
-                            scheme: "tableau10"
+                            labelLimit: 350,
+                            symbolSize: 140
                         }
                     },
 
-                    order: {
+                    detail: {
                         field: "appliance",
-                        type: "nominal",
-                        sort: "ascending"
+                        type: "nominal"
                     },
 
                     tooltip: [
@@ -226,10 +367,15 @@ async function initChart2() {
                             title: "Appliance"
                         },
                         {
-                            field: "value",
+                            field: "stock",
                             type: "quantitative",
-                            aggregate: "sum",
                             title: "Stock (millions)",
+                            format: ",.2f"
+                        },
+                        {
+                            field: "y1",
+                            type: "quantitative",
+                            title: "Cumulative stock",
                             format: ",.2f"
                         }
                     ]
@@ -246,7 +392,7 @@ async function initChart2() {
                         titleFont: "DM Sans",
                         labelFontSize: 12,
                         titleFontSize: 13,
-                        gridColor: "#e5e7eb"
+                        titlePadding: 12
                     },
 
                     legend: {
@@ -258,36 +404,45 @@ async function initChart2() {
                 }
             };
 
+            // =================================
+            // 8. RENDER CHART
+            // =================================
+
             await vegaEmbed("#chart2", spec, {
+
+                renderer: "svg",
 
                 actions: {
                     export: true,
                     source: false,
                     compiled: false,
                     editor: false
-                },
-
-                renderer: "svg"
-
+                }
             });
         }
 
-        // Display initial chart
+        // =====================================
+        // 9. INITIAL DISPLAY
+        // =====================================
+
         await renderChart(defaultCountry);
 
-        // Update chart when country changes
-        countrySelect.addEventListener(
+        // Update when country changes
+        dropdown.addEventListener(
             "change",
             async () => {
+
                 try {
-                    await renderChart(
-                        countrySelect.value
-                    );
+                    await renderChart(dropdown.value);
                 } catch (error) {
+
                     console.error(
-                        "Chart 2 rendering error:",
+                        "Chart 2 update error:",
                         error
                     );
+
+                    container.textContent =
+                        "Unable to update Chart 2.";
                 }
             }
         );
@@ -296,12 +451,9 @@ async function initChart2() {
 
         console.error("Chart 2 error:", error);
 
-        chartContainer.textContent =
-            "Unable to load Chart 2. " +
-            "Check the CSV file and console.";
-
+        container.textContent =
+            "Unable to load Chart 2: " + error.message;
     }
 }
 
 initChart2();
-
