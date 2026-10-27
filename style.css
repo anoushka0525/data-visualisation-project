@@ -756,3 +756,44 @@ footer a:hover {
         text-align: center;
     }
 }
+
+
+/* =====================================
+   SERIF TYPOGRAPHY FOR TITLES
+===================================== */
+
+/* Main website title */
+.hero h1 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+/* Chapter headings */
+.section-head h2,
+.intro h2,
+.conclusion h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+}
+
+/* Individual chart titles */
+.chart-card h3 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Sources heading */
+.sources h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+}
+
+/* Keep body text easy to read */
+body {
+    font-family: "DM Sans", Arial, sans-serif;
+}
